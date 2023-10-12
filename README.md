@@ -8,6 +8,7 @@ Welcome to the Useful SysAdmin Scripts repository! This repository contains a co
 
 > Note: To run the script, use the 'source' command (`source script_name.sh`) to ensure the virtual environment activation persists in the current shell.
 
+2. `mixaudio_video.sh`: This script merges the audio and video.
 ## Instructions
 
 Instructions for each script are provided within the comment sections of the respective script files. The comments explain the purpose of the script, how to use it, and any relevant considerations or dependencies.
