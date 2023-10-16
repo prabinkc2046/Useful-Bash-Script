@@ -1,6 +1,8 @@
 1. Create a file with then required names line by line 
 for example, 
+
 Rachel K C Brisbane
+
 prabin K C Melbourne
 
 2. Run the script as follow:
