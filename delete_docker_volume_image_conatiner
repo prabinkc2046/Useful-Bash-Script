@@ -1,7 +1,14 @@
-Scenario:
-This is one of the way we can delete the docker volume we don't need:
+For Scenario 1, I've demonstrated how to delete Docker volumes using awk and a while loop. This is useful for cleaning up unused volumes.
 
-when running docker volume ls, lists the number of volumes and you want to delete all of it. 
+For Scenario 2, I've shown how to delete Docker containers using awk and a while loop. This can be helpful for removing stopped containers.
+
+For Scenario 3, I've illustrated the process of deleting Docker images using a for loop. This is useful for freeing up storage space by removing unused or unnecessary images.
+
+Scenario1 :
+In this scenario, I show you how to delete all the docker volumes using
+command line:
+
+when running docker volume ls,it  lists the number of volumes and let's say, you want to delete all of it. 
 
 $ docker volume ls
 DRIVER    VOLUME NAME
@@ -165,5 +172,155 @@ shapetracker_shapetracker-mysql-data
 Check the volume listed:
 $ docker volume ls
 DRIVER    VOLUME NAME
+
+
+Scenario2:
+In this, I will show you how to delete all the containers using while condition:
+$ docker ps -a
+CONTAINER ID   IMAGE              COMMAND                  CREATED        STATUS                    PORTS     NAMES
+4c9135b7284e   mysql:latest       "docker-entrypoint.s…"   19 hours ago   Exited (0) 16 hours ago             mysql
+566921a4ee8f   wordpress:latest   "docker-entrypoint.s…"   19 hours ago   Exited (0) 16 hours ago             wordpress
+
+
+docker ps -a | awk 'NR > 1 {print $1}'
+4c9135b7284e
+566921a4ee8f
+
+
+$ docker ps -a | awk 'NR > 1 {print $1}' | while read container; do
+> echo "$container"
+> done;
+4c9135b7284e
+566921a4ee8f
+
+Now, since it's confirm that it returns the container id, let's go ahead and remove them:
+
+$  docker ps -a | awk 'NR > 1 {print $1}' | while read container; do
+> echo "removing container $container"
+> docker rm "$container"
+> done;
+removing container 4c9135b7284e
+4c9135b7284e
+removing container 566921a4ee8f
+566921a4ee8f
+
+
+$ docker ps -a
+CONTAINER ID   IMAGE     COMMAND   CREATED   STATUS    PORTS     NAMES
+
+
+Scenario3:
+Delete all the images using for loop:
+
+
+$ docker image ls
+REPOSITORY                   TAG       IMAGE ID       CREATED        SIZE
+prabinkc/django-crm-app      v5        ba21e7cafee3   22 hours ago   1.4GB
+stress_memory                latest    d779c87e03a7   5 days ago     124MB
+prabinkc/stress_memory       v1        d779c87e03a7   5 days ago     124MB
+prabinkc/stress_cpu          v1        b8ae3ba6243a   5 days ago     1.02GB
+prabinkc/mysql_healthcheck   v1        0121b2512eb4   6 days ago     1.16GB
+wordpress                    latest    c93e91447c7f   6 days ago     668MB
+prabinkc/django-crm-app      v3        05d6e80cc4a8   7 days ago     1.4GB
+nginx                        latest    c20060033e06   13 days ago    187MB
+mysql                        latest    a3b6608898d6   3 weeks ago    596MB
+prabinkc/mydb                v1        a762ea799910   3 weeks ago    596MB
+
+
+$ docker image ls | awk 'NR > 1{print $3}'
+ba21e7cafee3
+d779c87e03a7
+d779c87e03a7
+b8ae3ba6243a
+0121b2512eb4
+c93e91447c7f
+05d6e80cc4a8
+c20060033e06
+a3b6608898d6
+a762ea799910
+
+$ for img in $(docker image ls | awk 'NR > 1{print $3}'); do echo "$img"; done;
+ba21e7cafee3
+d779c87e03a7
+d779c87e03a7
+b8ae3ba6243a
+0121b2512eb4
+c93e91447c7f
+05d6e80cc4a8
+c20060033e06
+a3b6608898d6
+a762ea799910
+
+Since it's confirm the container id, let's go ahead and delete it.
+
+$ for img in $(docker image ls | awk 'NR > 1{print $3}'); do
+> echo "deleting image $img"
+> docker rmi "$img"
+> done;
+deleting image ba21e7cafee3
+Untagged: prabinkc/django-crm-app:v5
+Untagged: prabinkc/django-crm-app@sha256:e57d1be6d60b21c382cf524294970190c454f637ed495bf2cac04ef1c4de2555
+Deleted: sha256:ba21e7cafee3a1e4935165ef16b6022e468eff29eaf1c9d1edbeae165e0ba55b
+deleting image d779c87e03a7
+Error response from daemon: conflict: unable to delete d779c87e03a7 (must be forced) - image is referenced in multiple repositories
+deleting image d779c87e03a7
+Error response from daemon: conflict: unable to delete d779c87e03a7 (must be forced) - image is referenced in multiple repositories
+deleting image b8ae3ba6243a
+Untagged: prabinkc/stress_cpu:v1
+Untagged: prabinkc/stress_cpu@sha256:db42f7061552878514adfbf6fb2df240620ce5f997b99c72681cb724108e5449
+Deleted: sha256:b8ae3ba6243a008ec0ed8fdf835977b8b31ca805efbdeb1e4ddda439e6a7b813
+deleting image 0121b2512eb4
+Untagged: prabinkc/mysql_healthcheck:v1
+Untagged: prabinkc/mysql_healthcheck@sha256:1013a718cb7a87c561a6a5c33b33a35f811ca7e42baee62f0e65863b978a18c6
+Deleted: sha256:0121b2512eb44d848cb7c7bd2bd147cd9cd45c2d0a051f15674c76d65a006cf4
+deleting image c93e91447c7f
+Untagged: wordpress:latest
+Untagged: wordpress@sha256:6081cb89c0d0e0a143691b7e1446dcf54b5fa578ed1b65a7776f1e612ec06d31
+Deleted: sha256:c93e91447c7f9334e8de3d9ee3b7015560515d03681bba58b06d8f3e3fb21576
+Deleted: sha256:919e6710b578b722d34c3a05740c85d5cc85bdf880726b391064168dcfd777eb
+Deleted: sha256:ffb154868eb3059c25c41f42144262f6b006e51b0eb778e7df72a2714a0bb8bb
+Deleted: sha256:218181118934ab02a24e5a06ef611568722dcfb565ec941253cc3782b7e158f3
+Deleted: sha256:af9d21aac35cd28d4a5f611bc3c7bc95afc90b3571aa42647c19625eefe32a43
+Deleted: sha256:403c1592275d2157dd4f374e9a8550bc084d1b877571e97a3a5806e73ac7394c
+Deleted: sha256:7691700cf4f845f5625465df09799847dbcceda5ee7af30a79237c087f374f2f
+Deleted: sha256:be122c4d8e9a293036a24e438e5e568c1138b9e2d0fb5e8bfd494185ba1d8f4f
+Deleted: sha256:b43b27b657b0fa41206fcf05ad95d62b323bb56db99c6536d22bf75094f11908
+Deleted: sha256:1c2321df73d046e6d4a35878e38cf4635e2545957c28aaddd76a9f1c2a557c52
+Deleted: sha256:76ea515560d89e9c29e2b408a67af4d586ae2c227178462553e7dbcdfb970154
+Deleted: sha256:2155856c8cba38435eaf910b212cb930965934cf05cd4fad3693de8e301ba6d3
+Deleted: sha256:793f566a8fc87413ec2efac35777741c577005367facba67b7bb9d3f1755048b
+Deleted: sha256:4b9ca5438a5580756b567b950b1a827eea281244c8be2dc6f04000f75b310ac6
+Deleted: sha256:a71c837d11b05de6830ec633ca14df7556341f7cd209334ba555b7886d85ddbf
+Deleted: sha256:54af17787ae3089abe16ca96f0232b7f31b05f5ea8db56cefdd2a909e2bbfcd9
+Deleted: sha256:22535b141ba0d174aa007f0ccc2d49c0d6d6c1c9d926b3a551b4eac6acab93b2
+Deleted: sha256:22620e6499bfac69565ff6b05790d2b081bf54c88a15521c94f8626f0577ebc4
+Deleted: sha256:c9eb87872e0e22870d10c4d8a3e07b840cb28ff8b29a0e9fba4cc24663d6c8dc
+Deleted: sha256:da5ffa8e197038e2274f903f1d4bd48035ccdaa2800fdaa6968f37835c36bc62
+Deleted: sha256:3edb0fa22fa507106e73eb8420307e3fc89b79c06e095560db2d96e978d7e20d
+Deleted: sha256:74c0af6e02274b54b88f851843ae69880a234694dede8ff9fb93bfa076af45ed
+deleting image 05d6e80cc4a8
+Untagged: prabinkc/django-crm-app:v3
+Untagged: prabinkc/django-crm-app@sha256:c5bc010dce8ddd6f88ecf822a3b8502f63f1614de5d3077fc4e3a0ab22a2b72d
+Deleted: sha256:05d6e80cc4a8db853015e713f6241a79362d3321beb31b6253122caece800281
+deleting image c20060033e06
+Untagged: nginx:latest
+Untagged: nginx@sha256:86e53c4c16a6a276b204b0fd3a8143d86547c967dc8258b3d47c3a21bb68d3c6
+Deleted: sha256:c20060033e06f882b0fbe2db7d974d72e0887a3be5e554efdb0dcf8d53512647
+Deleted: sha256:32cf0b3c70998330104acfc1a02f6aae2f8a728bc6ad91c2415fda501593fa81
+Deleted: sha256:79cae367d5d42d54224c249db6a06234d077ea32168bed4261141c1016469623
+Deleted: sha256:32b31b2b0563a28eb36f90bcd835540ead275b63cf48ed85e998a8df0b1845ff
+Deleted: sha256:203226d708244adf6c392a28e22e3a7e276270da43094205137c404fc9949691
+Deleted: sha256:9969d65d0618198425e0be29ec6194be71b36c856ce9fe2142dd54163aef6eae
+Deleted: sha256:e9c1515f88f6e5652bde5583f0d1ddb7dd4097380aa66d90b722c53fbea3ebab
+Deleted: sha256:ec983b16636050e69677eb81537e955ab927757c23aaf73971ecf5f71fcc262a
+deleting image a3b6608898d6
+Untagged: mysql:latest
+Untagged: mysql@sha256:1773f3c7aa9522f0014d0ad2bbdaf597ea3b1643c64c8ccc2123c64afd8b82b1
+Deleted: sha256:a3b6608898d600759effd58768b7213bb44a6d58ab3a53495dd88e6b2042a8a4
+deleting image a762ea799910
+Untagged: prabinkc/mydb:v1
+Untagged: prabinkc/mydb@sha256:4b50d5f956ff556d03dd35a7faacb3e3ec645dce42ff01de7b7e99f8b3166861
+Deleted: sha256:a762ea7999106914a4cbe6a12415383e325fd2297686b8f1c20f46b80a935b44
+
 
 
