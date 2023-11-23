@@ -1,0 +1,17 @@
+#!/bin/bash
+# This script can be run against video to make it faster.
+# Usage: ./make_it_faster <input file> <output file name> <speed level 2 or 3 or 4>
+
+# Checks the requir arguements are provided
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <input file> <output file name> <speed level 2 or 3 or 4>"
+    exit
+fi
+
+# Variables to use
+input_file=$1
+output_file=$2
+speed_level=$3
+
+ffmpeg -i "$input_file" -vf "setpts=$(expr 1 / $speed_level)*PTS" -c:a copy "$output_file".mp4
+
