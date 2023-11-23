@@ -1,12 +1,38 @@
 #!/bin/bash
 # This script can be run against video to make it faster.
 # Usage: ./make_it_faster <input file> <output file name> <speed level 2 or 3 or 4>
+# requires: ffmpeg be installed prior to running this script
 
 # Checks the requir arguements are provided
 if [ "$#" -ne 3 ]; then
     echo "Usage: $0 <input file> <output file name> <speed level 2 or 3 or 4>"
     exit
 fi
+
+distro=""
+source /etc/os-release
+if [ -n "$ID" ]; then
+distro=$(echo "$ID" | tr '[:upper:]' '[:lower:]')
+else
+echo "Distro is not detected but hope it works for you"
+fi
+
+case $distro in 
+"ubuntu"|"debian")
+if dpkg-l | awk '{print $2}'| grep ffmpeg; then
+    echo "ffmpge is installed"
+else
+    apt install -y ffmpeg
+fi
+;;
+"centos"|"fedora")
+if rpm -q --quiet ffmpg; then
+    echo "ffmpge is installed"
+else
+    dnf install -y ffmpg
+fi
+;;
+esac 
 
 # Variables to use
 input_file=$1
