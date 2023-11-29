@@ -1,0 +1,19 @@
+#!/bin/bash
+
+#count the number of container that exits in the system
+num_of_container=$(/usr/bin/docker ps -aq | /usr/bin/wc -l)
+
+#if number of container is 1 or greater than 1, stop and remove container
+if [ "$num_of_container" -gt 0 ]
+then
+
+# stops all the running container
+/usr/bin/docker stop $(/usr/bin/docker ps -aq) > /dev/null
+
+#deletes all the running and not running containers
+/usr/bin/docker rm $(/usr/bin/docker ps -aq) > /dev/null
+echo "All containers removed :)"
+else
+  echo "NO containers founds"
+fi
+

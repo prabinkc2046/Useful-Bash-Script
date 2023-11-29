@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# count the number of container
+num_of_container=$(/usr/bin/docker ps -aq | /usr/bin/wc -l)
+num_of_images=$(/usr/bin/docker images -aq | /usr/bin/wc -l)
+# check if atleast one container is found then, stop the container
+#remove the container
+
+if [ "$num_of_container" -gt 0 ]
+then
+#firstly stops all the container
+/usr/bin/docker stop $(/usr/bin/docker ps -aq) > /dev/null
+
+#secondly delete all the container
+/usr/bin/docker rm  $(/usr/bin/docker ps -aq) > /dev/null
+
+# finally delete all the existing images
+/usr/bin/docker rmi $(/usr/bin/docker images -aq) > /dev/null
+echo "All containers and images deleted :)"
+exit 0
+else
+  echo "no container found"
+  echo "Proceeding to delete image if images exist...."  
+fi
+
+
+if [ "$num_of_images" -gt 0 ]
+then
+# finally delete all the existing images
+/usr/bin/docker rmi $(/usr/bin/docker images -aq) > /dev/null
+echo "Al images deleted :)"
+else
+   echo "NO image found to be deleted"
+   exit 1
+fi
+
